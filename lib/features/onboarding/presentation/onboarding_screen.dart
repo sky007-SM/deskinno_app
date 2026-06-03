@@ -7,7 +7,7 @@ import 'package:myapp/features/ble_connectivity/application/ble_provider.dart';
 import 'package:myapp/features/ble_connectivity/domain/ble_device.dart';
 import 'package:myapp/features/developer_mode/application/developer_mode_provider.dart';
 import 'package:myapp/features/onboarding/application/onboarding_state.dart';
-import 'package:myapp/features/onboarding/presentation/widgets/bot_face_painter.dart';
+import 'package:myapp/features/robot_face/robot_face_component.dart';
 import 'package:myapp/features/root_gate/presentation/root_gate.dart';
 import 'package:myapp/services/permission_service.dart';
 
@@ -35,7 +35,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> with TickerProviderStateMixin {
-  late AnimationController _bootController, _transitionController, _idleController;
+  late AnimationController _bootController, _transitionController;
   late Animation<double> _bootAnimation;
   int _tapCount = 0;
   Timer? _tapTimer;
@@ -46,7 +46,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> with Ticker
     _bootController = AnimationController(vsync: this, duration: const Duration(seconds: 3))..forward();
     _bootAnimation = CurvedAnimation(parent: _bootController, curve: Curves.easeInOut);
     _transitionController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _idleController = AnimationController(vsync: this, duration: const Duration(seconds: 5))..repeat();
 
     _bootController.addStatusListener((status) {
       if (status == AnimationStatus.completed) ref.read(onboardingStateProvider.notifier).completeBooting();
@@ -60,7 +59,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> with Ticker
   void dispose() {
     _bootController.dispose();
     _transitionController.dispose();
-    _idleController.dispose();
     _tapTimer?.cancel();
     super.dispose();
   }
@@ -91,11 +89,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> with Ticker
 
     return Scaffold(
       body: AnimatedBuilder(
-        animation: Listenable.merge([_bootAnimation, _transitionController, _idleController]),
+        animation: Listenable.merge([_bootAnimation, _transitionController]),
         builder: (context, child) {
           final faceAlignment = Alignment.lerp(Alignment.center, const Alignment(0.0, -0.7), _transitionController.value)!;
           final faceScale = (1 - (_transitionController.value * 0.5));
-          final textOpacity = onboardingState.phase == OnboardingPhase.booting ? (_bootAnimation.value > 0.5 ? (_bootAnimation.value - 0.5) * 2 : 0.0) : 1 - _transitionController.value;
 
           return Stack(
             children: [
@@ -105,18 +102,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> with Ticker
                   alignment: faceAlignment,
                   child: Transform.scale(
                     scale: faceScale,
-                    child: AspectRatio(
-                      aspectRatio: 2 / 1,
-                      child: CustomPaint(
-                        painter: BotFacePainter(animationValue: _bootAnimation.value, idleAnimationValue: _idleController.value),
-                        child: Center(
-                          child: Opacity(
-                            opacity: textOpacity.clamp(0.0, 1.0),
-                            child: const Text('INNo name', style: TextStyle(color: Colors.white, fontSize: 16, shadows: [Shadow(blurRadius: 10.0, color: Colors.cyanAccent, offset: Offset(0, 0))])),
-                          ),
-                        ),
-                      ),
-                    ),
+                    child: const RiverpodRobotFace(),
                   ),
                 ),
               ),
