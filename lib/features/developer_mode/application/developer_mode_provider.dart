@@ -1,18 +1,20 @@
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// A provider to manage the developer mode state.
-class DeveloperModeNotifier extends Notifier<bool> {
-  @override
-  bool build() {
-    return false; // Initial state is disabled
+// Provider to track the developer mode state
+final developerModeEnabledProvider = StateProvider<bool>((ref) => false);
+
+// Provider to manage the simulation state
+final simulationProvider = StateNotifierProvider<SimulationNotifier, bool>((ref) => SimulationNotifier());
+
+class SimulationNotifier extends StateNotifier<bool> {
+  SimulationNotifier() : super(false);
+
+  void startSimulation() {
+    state = true;
   }
 
-  /// Toggles the developer mode state.
-  void toggle() {
-    state = !state;
+  void stopSimulation() {
+    state = false;
   }
 }
-
-final developerModeProvider = NotifierProvider<DeveloperModeNotifier, bool>(() {
-  return DeveloperModeNotifier();
-});
