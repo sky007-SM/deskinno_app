@@ -57,8 +57,8 @@ class TableBot {
     // have to rely on the telemetry string for this information.
     // We will assume for now that the ESP32 will send this information.
     // If not, we will need to update this logic.
-    final isCharging = false;
-    final isFullyCharged = false;
+    const isCharging = false;
+    const isFullyCharged = false;
 
     return TableBot(
       state: state,
